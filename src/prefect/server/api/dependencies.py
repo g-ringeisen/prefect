@@ -131,23 +131,47 @@ def LimitBody() -> Any:
     return Depends(get_limit)
 
 
-def get_created_by(
-    prefect_automation_id: Optional[UUID] = Header(None, include_in_schema=False),
-    prefect_automation_name: Optional[str] = Header(None, include_in_schema=False),
-) -> Optional[schemas.core.CreatedBy]:
-    """A dependency that returns the provenance information to use when creating objects
-    during this API call."""
+def get_created_by(request: Request) -> Optional[schemas.core.CreatedBy]:
+    """
+    Author: g-ringeisen
+    Override the original `get_created_by`
+
+    A dependency that returns the provenance information to use when creating objects during this API call.
+    Reads the `prefect-automation-xx` headers like in the original function and then try the `user` request property.
+    The `user` request property might be set by an authentication middleware.
+    """
+    prefect_automation_id = request.headers.get("prefect-automation-id")
+    prefect_automation_name = request.headers.get("prefect-automation-name")
+
     if prefect_automation_id and prefect_automation_name:
+        try:
+            uuid = UUID(prefect_automation_id)
+        except Exception:
+            uuid = None
+
         try:
             display_value = b64decode(prefect_automation_name.encode()).decode()
         except Exception:
             display_value = None
 
-        if display_value:
+        if uuid and display_value:
             return schemas.core.CreatedBy(
-                id=prefect_automation_id,
+                id=uuid,
                 type="AUTOMATION",
                 display_value=display_value,
+            )
+
+    if request.user is not None and request.user.is_authenticated:
+        try:
+            user_id = UUID(request.user.identity)
+        except Exception:
+            user_id = None
+
+        if user_id:
+            return schemas.core.CreatedBy(
+                id=UUID(request.user.identity),
+                type="USER",
+                display_value=request.user.display_name,
             )
 
     return None
