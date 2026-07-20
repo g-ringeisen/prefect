@@ -101,7 +101,7 @@ class Settings(PrefectBaseSettings):
     model_config: ClassVar[SettingsConfigDict] = build_settings_config()
 
     home: Annotated[Path, BeforeValidator(lambda x: Path(x).expanduser())] = Field(
-        default=Path("~") / ".prefect",
+        default=Path("~/.prefect").as_posix(),
         description="The path to the Prefect home directory. Defaults to ~/.prefect",
     )
 
