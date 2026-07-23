@@ -6,10 +6,8 @@ from __future__ import annotations
 
 import asyncio
 import atexit
-import base64
 import contextlib
 import gc
-import hmac
 import importlib.metadata
 import logging
 import mimetypes
@@ -43,6 +41,7 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from packaging.version import Version
+from starlette.middleware.authentication import AuthenticationMiddleware
 from typing_extensions import Self
 
 import prefect
@@ -50,6 +49,11 @@ import prefect.server.api as api
 import prefect.settings
 from prefect._internal.compatibility.starlette import status
 from prefect._internal.observability import configure_logfire
+from prefect.authorizations import (
+    AuthBackend,
+    AuthorizationMiddleware,
+    resolve_api_scope,
+)
 from prefect.client.constants import SERVER_API_VERSION
 from prefect.locking._filelock import FileLock
 from prefect.logging import get_logger
@@ -433,6 +437,7 @@ def create_api_app(
     dependencies: list[Any] | None = None,
     health_check_path: str = "/health",
     version_check_path: str = "/version",
+    auth_check_path: str = "/me",
     fast_api_app_kwargs: dict[str, Any] | None = None,
     final: bool = False,
     ignore_cache: bool = False,
@@ -476,6 +481,19 @@ def create_api_app(
     async def server_version() -> str:  # type: ignore[reportUnusedFunction]
         return SERVER_API_VERSION
 
+    @api_app.get(auth_check_path, tags=["Root"])
+    async def user_information(request: Request) -> JSONResponse:  # type: ignore[reportUnusedFunction]
+        is_authenticated = request.user.is_authenticated if request.user else False
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "is_authenticated": is_authenticated,
+                "identity": request.user.identity if is_authenticated else None,
+                "display_name": request.user.display_name if is_authenticated else "",
+                "scopes": request.auth.scopes if is_authenticated else [],
+            },
+        )
+
     # always include version checking
     if dependencies is None:
         dependencies = [Depends(enforce_minimum_version)]
@@ -516,44 +534,8 @@ def create_api_app(
             ]
         return await call_next(request)
 
-    auth_string = prefect.settings.PREFECT_SERVER_API_AUTH_STRING.value()
-
-    if auth_string is not None:
-        health_check_paths = {health_check_path, "/ready"}
-
-        @api_app.middleware("http")
-        async def token_validation(request: Request, call_next: Any):  # type: ignore[reportUnusedFunction]
-            header_token = request.headers.get("Authorization")
-
-            # Allow unauthenticated health/ready probes (e.g. k8s).
-            # Use scope["path"] (not request.url.path) because url.path
-            # can be spoofed via Host header manipulation. Use exact path
-            # matching (not suffix matching) to prevent auth bypass via
-            # crafted paths like /variables/name/system-health.
-            scope = request.scope
-            app_path = scope["path"].removeprefix(scope.get("root_path", ""))
-            if app_path in health_check_paths and request.method.upper() == "GET":
-                return await call_next(request)
-            try:
-                if header_token is None:
-                    return JSONResponse(
-                        status_code=status.HTTP_401_UNAUTHORIZED,
-                        content={"exception_message": "Unauthorized"},
-                    )
-                scheme, creds = header_token.split()
-                assert scheme == "Basic"
-                decoded = base64.b64decode(creds).decode("utf-8")
-            except Exception:
-                return JSONResponse(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    content={"exception_message": "Unauthorized"},
-                )
-            if not hmac.compare_digest(decoded, auth_string):
-                return JSONResponse(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    content={"exception_message": "Unauthorized"},
-                )
-            return await call_next(request)
+    api_app.add_middleware(AuthorizationMiddleware)
+    api_app.add_middleware(AuthenticationMiddleware, backend=AuthBackend())
 
     API_APP_CACHE[cache_key] = api_app
 
@@ -1049,7 +1031,29 @@ def create_app(
             routes=api_app.routes,
         )
         new_schema = partial_schema.copy()
+        new_schema.setdefault("components", {})["securitySchemes"] = {
+            "BasicAuth": {
+                "type": "http",
+                "scheme": "Basic",
+            },
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "Bearer",
+            },
+        }
 
+        new_paths = {}
+        for path, path_item in new_schema.get("paths", {}).items():
+            new_paths[f"/api{path}"] = path_item
+            for method, operation in path_item.items():
+                scopes = resolve_api_scope(path, method)
+                if scopes:
+                    operation["security"] = [
+                        {"BasicAuth": []},
+                        {"BearerAuth": []},
+                    ]
+
+        new_schema["paths"] = new_paths
         new_schema["info"]["x-logo"] = {"url": "static/prefect-logo-mark-gradient.png"}
         return new_schema
 
