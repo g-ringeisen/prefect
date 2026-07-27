@@ -49,11 +49,6 @@ import prefect.server.api as api
 import prefect.settings
 from prefect._internal.compatibility.starlette import status
 from prefect._internal.observability import configure_logfire
-from prefect.authorizations import (
-    AuthBackend,
-    AuthorizationMiddleware,
-    resolve_api_scope,
-)
 from prefect.client.constants import SERVER_API_VERSION
 from prefect.locking._filelock import FileLock
 from prefect.logging import get_logger
@@ -61,6 +56,11 @@ from prefect.server.api._ui_static import UIBundle, UIVersion, log_ui_static_cop
 from prefect.server.api.background_workers import background_worker
 from prefect.server.api.dependencies import EnforceMinimumAPIVersion
 from prefect.server.exceptions import ObjectNotFoundError
+from prefect.server.rbac import (
+    AuthBackend,
+    AuthorizationMiddleware,
+    resolve_api_scope,
+)
 from prefect.server.schemas.ui import UISettings
 from prefect.server.services.base import RunInEphemeralServers, RunInWebservers, Service
 from prefect.server.utilities.database import get_dialect
@@ -133,6 +133,8 @@ API_ROUTERS = (
     api.ui.schemas.router,
     api.ui.task_runs.router,
     api.admin.router,
+    api.rbac.accounts_router,
+    api.rbac.roles_router,
     api.root.router,
 )
 

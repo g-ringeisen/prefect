@@ -1,6 +1,7 @@
 import base64
 import hmac
 import re
+from uuid import UUID
 
 from fastapi import status
 from starlette.authentication import (
@@ -16,13 +17,12 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
 import prefect
+from prefect.server.rbac.api_scopes import resolve_api_scope
+from prefect.server.rbac.models import get_scopes_for_account
+from prefect.server.rbac.schemas import Account
 
-from .api_scopes import resolve_api_scope
 
-ADMIN_GUID = "5f622dbe-6ba3-4ce6-87bf-f66cb8326889"
-
-
-class Account(BaseUser):
+class AuthUser(BaseUser):
     def __init__(self, account_id: str, account_name: str) -> None:
         self.account_id = account_id
         self.account_name = account_name
@@ -40,6 +40,11 @@ class Account(BaseUser):
         return self.account_id
 
 
+ADMIN_GUID = UUID("5f622dbe-6ba3-4ce6-87bf-f66cb8326889")
+ADMIN_USER = AuthUser(ADMIN_GUID, "Administrator")
+ADMIN_SCOPES = ["admin", "authenticated"]
+
+
 # -------------------------
 # Custom Authentication Backend
 # -------------------------
@@ -51,54 +56,55 @@ class AuthBackend(AuthenticationBackend):
     async def authenticate(
         self, conn: HTTPConnection
     ) -> tuple[AuthCredentials, BaseUser] | None:
+        account: Account = None
         header = conn.headers.get("Authorization")
         if header:
             scheme, token = header.split(" ", 1)
             match scheme.lower():
                 case "basic":
-                    user = self._authenticate_basic(token)
+                    auth_string = (
+                        prefect.settings.PREFECT_SERVER_API_AUTH_STRING.value()
+                    )
+                    decoded = base64.b64decode(token).decode("utf-8")
+                    if hmac.compare_digest(decoded, auth_string):
+                        return (AuthCredentials(ADMIN_SCOPES), ADMIN_USER)
+                    account = await self._authenticate_basic(token)
                 case "bearer":
-                    user = self._authenticate_bearer(token)
+                    account = await self._authenticate_bearer(token)
                 case "apikey":
-                    user = self._authenticate_token(token)
+                    account = await self._authenticate_token(token)
                 case _:
                     raise AuthenticationError(f"Invalid Authorization scheme {scheme}")
 
-        if not user:
+        if not account:
             user = UnauthenticatedUser()
-        if user.is_authenticated:
-            scopes = ["authenticated"] + self._authorize(user.identity)
-        else:
             scopes = []
-
+        else:
+            user = AuthUser(account.id, account.name)
+            scopes = ["authenticated"]
+            scopes += await self._authorize(account.id)
         return (AuthCredentials(scopes), user)
 
-    def _authenticate_basic(self, token: str) -> Account | None:
-
-        auth_string = prefect.settings.PREFECT_SERVER_API_AUTH_STRING.value()
-        decoded = base64.b64decode(token).decode("utf-8")
-        if hmac.compare_digest(decoded, auth_string):
-            return Account(ADMIN_GUID, "Administrator")
-
+    async def _authenticate_basic(self, token: str) -> Account | None:
         return None
 
-    def _authenticate_bearer(self, token: str) -> Account | None:
+    async def _authenticate_bearer(self, token: str) -> Account | None:
         if re.match(r"^eyJ[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$", token):
             return self._authenticate_jwt(token)
         else:
             return self._authenticate_token(token)
 
-    def _authenticate_jwt(self, token: str) -> Account | None:
+    async def _authenticate_jwt(self, token: str) -> Account | None:
         return None
 
-    def _authenticate_token(self, token: str) -> Account | None:
-        return Account("a8167efd-26e6-4be8-aac1-818198e01e68", "Demo User")
+    async def _authenticate_token(self, token: str) -> Account | None:
+        return None
 
-    def _authorize(self, userid: str) -> list[str]:
-        if userid == ADMIN_GUID:
+    async def _authorize(self, account_id: UUID) -> list[str]:
+        if account_id == ADMIN_GUID:
             return ["admin"]
         else:
-            return ["see_flows"]
+            return get_scopes_for_account(UUID(account_id))
 
 
 class AuthorizationMiddleware(BaseHTTPMiddleware):
@@ -112,14 +118,15 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         app_path = request.scope["path"].removeprefix(
             request.scope.get("root_path", "")
         )
-        auth_scope = resolve_api_scope(app_path, request.method)
+        route_scopes = resolve_api_scope(app_path, request.method)
+        user_scopes = set(request.auth.scopes) if request.auth is not None else []
 
-        # If the route is public
-        if not auth_scope:
+        # If the route is public or the user is super admin
+        if not route_scopes or "admin" in user_scopes:
             return await call_next(request)
 
         # If the request authorizations is not set or does not contains the required scopes
-        if request.auth is None or set(request.auth.scopes).isdisjoint(auth_scope):
+        if request.auth is None or user_scopes.issubset(route_scopes):
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"exception_message": "Unauthorized"},

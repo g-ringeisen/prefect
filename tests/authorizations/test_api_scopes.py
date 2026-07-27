@@ -1,4 +1,4 @@
-from prefect.authorizations import resolve_api_scope
+from prefect.server.rbac import resolve_api_scope
 
 
 def test_existing_static_api_path():
