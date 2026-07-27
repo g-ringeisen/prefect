@@ -3088,6 +3088,225 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/accounts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Accounts
+         * @description List all accounts.
+         */
+        get: operations["list_accounts_accounts__get"];
+        put?: never;
+        /**
+         * Create Account
+         * @description Create a new account.
+         */
+        post: operations["create_account_accounts__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{account_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Account
+         * @description Get a single account by ID.
+         */
+        get: operations["get_account_accounts__account_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Account
+         * @description Delete an account.
+         */
+        delete: operations["delete_account_accounts__account_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Account
+         * @description Partially update an account.
+         */
+        patch: operations["update_account_accounts__account_id__patch"];
+        trace?: never;
+    };
+    "/accounts/{account_id}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Account Roles
+         * @description Get all roles assigned to an account.
+         */
+        get: operations["get_account_roles_accounts__account_id__roles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{account_id}/roles/{role_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assign Role To Account
+         * @description Assign a role to an account.
+         */
+        post: operations["assign_role_to_account_accounts__account_id__roles__role_id__post"];
+        /**
+         * Remove Role From Account
+         * @description Remove a role from an account.
+         */
+        delete: operations["remove_role_from_account_accounts__account_id__roles__role_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{account_id}/api_keys/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Api Keys
+         * @description List all api keys of the account.
+         */
+        get: operations["list_api_keys_accounts__account_id__api_keys__get"];
+        put?: never;
+        /**
+         * Create Api Key
+         * @description Create a new api key.
+         */
+        post: operations["create_api_key_accounts__account_id__api_keys__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{account_id}/api_keys/{api_key_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Api Key
+         * @description List all api keys of the account.
+         */
+        get: operations["get_api_key_accounts__account_id__api_keys__api_key_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Api Key
+         * @description Delete an api key.
+         */
+        delete: operations["delete_api_key_accounts__account_id__api_keys__api_key_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/roles/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Roles
+         * @description List all roles.
+         */
+        get: operations["list_roles_roles__get"];
+        put?: never;
+        /**
+         * Create Role
+         * @description Create a new role.
+         */
+        post: operations["create_role_roles__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/roles/{role_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Role
+         * @description Get a single role by ID, including its scopes.
+         */
+        get: operations["get_role_roles__role_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Role
+         * @description Delete a role.
+         */
+        delete: operations["delete_role_roles__role_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Role
+         * @description Partially update a role (name and/or scopes).
+         */
+        patch: operations["update_role_roles__role_id__patch"];
+        trace?: never;
+    };
+    "/roles/{role_id}/scopes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Update Role Scopes
+         * @description Replace the full list of scopes for a role.
+         *
+         *     The provided list is treated as the new authoritative set —
+         *     any scope not included is revoked.
+         */
+        post: operations["update_role_scopes_roles__role_id__scopes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/hello": {
         parameters: {
             query?: never;
@@ -3189,6 +3408,98 @@ export interface components {
              * @default 60
              */
             request_timeout: number;
+        };
+        /**
+         * Account
+         * @description Returned by account read endpoints.
+         *
+         *     Roles are not embedded — use GET /api/accounts/{id}/roles.
+         *     Inherits id, created, updated from ORMBaseModel.
+         */
+        Account: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Created */
+            created: string | null;
+            /** Updated */
+            updated: string | null;
+            /** Name */
+            name: string;
+            /** Username */
+            username: string;
+            /** Email */
+            email: string;
+        };
+        /**
+         * AccountCreate
+         * @description Payload for POST /api/accounts.
+         */
+        AccountCreate: {
+            /** Name */
+            name: string;
+            /** Username */
+            username?: string | null;
+            /** Password */
+            password?: string | null;
+            /** Email */
+            email?: string | null;
+        };
+        /**
+         * AccountUpdate
+         * @description Payload for PATCH /api/accounts/{account_id} — all fields are optional.
+         */
+        AccountUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Username */
+            username?: string | null;
+            /** Password */
+            password?: string | null;
+            /** Email */
+            email?: string | null;
+        };
+        /**
+         * AccountWithRoles
+         * @description Extended account response that includes the assigned roles.
+         */
+        AccountWithRoles: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Created */
+            created: string | null;
+            /** Updated */
+            updated: string | null;
+            /** Name */
+            name: string;
+            /** Username */
+            username: string;
+            /** Email */
+            email: string;
+            /**
+             * Roles
+             * @default []
+             */
+            roles: components["schemas"]["Role"][];
+        };
+        /** ApiKey */
+        ApiKey: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Created */
+            created: string | null;
+            /** Updated */
+            updated: string | null;
+            /** Key */
+            key: string;
         };
         /** Artifact */
         Artifact: {
@@ -9252,6 +9563,64 @@ export interface components {
             work_queue_id?: string | null;
         };
         /**
+         * Role
+         * @description Returned by all role endpoints.
+         *
+         *     Inherits id, created, updated from ORMBaseModel.
+         */
+        Role: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Created */
+            created: string | null;
+            /** Updated */
+            updated: string | null;
+            /** Name */
+            name: string;
+            /**
+             * Scopes
+             * @default []
+             */
+            scopes: components["schemas"]["Scope"][];
+        };
+        /**
+         * RoleCreate
+         * @description Payload for POST /api/roles.
+         */
+        RoleCreate: {
+            /** Name */
+            name: string;
+            /**
+             * Scopes
+             * @default []
+             */
+            scopes: components["schemas"]["Scope"][];
+        };
+        /**
+         * RoleScopesUpdate
+         * @description Payload for POST /api/roles/{role_id}/scopes.
+         *
+         *     The provided list is treated as the new authoritative set —
+         *     any scope not included is revoked.
+         */
+        RoleScopesUpdate: {
+            /** Scopes */
+            scopes: components["schemas"]["Scope"][];
+        };
+        /**
+         * RoleUpdate
+         * @description Payload for PATCH /api/roles/{role_id} — all fields are optional.
+         */
+        RoleUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Scopes */
+            scopes?: components["schemas"]["Scope"][] | null;
+        };
+        /**
          * RunDeployment
          * @description Runs the given deployment with the given parameters
          */
@@ -9551,6 +9920,23 @@ export interface components {
             /** Valid */
             valid: boolean;
         };
+        /**
+         * Scope
+         * @description Exhaustive list of scopes available in Prefect RBAC.
+         *
+         *     Each value is a string of the form "<action>_<resource>" following
+         *     the pattern already used by FastAPI / OAuth2 security schemes so
+         *     that scopes can be forwarded to SecurityScopes dependencies without
+         *     any transformation.
+         *
+         *     Three-level convention for most resources:
+         *       see_*    → read access
+         *       write_*  → create / update
+         *       manage_* → delete / admin operations
+         *     Some resources add a dedicated action scope (run_*, etc.).
+         * @enum {string}
+         */
+        Scope: "see_flows" | "run_flows" | "manage_flows" | "see_deployments" | "write_deployments" | "run_deployments" | "manage_deployments" | "see_work_pools" | "write_work_pools" | "manage_work_pools" | "see_work_queues" | "write_work_queues" | "manage_work_queues" | "see_workers" | "write_workers" | "manage_workers" | "see_artifacts" | "write_artifacts" | "manage_artifacts" | "see_assets" | "see_blocks" | "manage_blocks" | "see_variables" | "write_variables" | "manage_variables" | "see_concurrency_limits" | "manage_concurrency_limits" | "see_automations" | "manage_automations" | "manage_saved_search" | "see_workspace_settings" | "write_workspace_settings" | "see_workspace_users" | "manage_workspace_users" | "manage_workspace_teams" | "manage_accounts" | "manage_roles";
         /**
          * SendNotification
          * @description Send a notification when an Automation is triggered
@@ -19278,6 +19664,624 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_accounts_accounts__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_account_accounts__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_account_accounts__account_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_account_accounts__account_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_account_accounts__account_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_account_roles_accounts__account_id__roles_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountWithRoles"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_role_to_account_accounts__account_id__roles__role_id__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+                /** @description The role ID to assign. */
+                role_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_role_from_account_accounts__account_id__roles__role_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+                /** @description The role ID to remove. */
+                role_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_api_keys_accounts__account_id__api_keys__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKey"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_api_key_accounts__account_id__api_keys__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKey"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_api_key_accounts__account_id__api_keys__api_key_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+                /** @description The api key ID. */
+                api_key_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKey"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_api_key_accounts__account_id__api_keys__api_key_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The account ID. */
+                account_id: string;
+                /** @description The api key ID. */
+                api_key_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_roles_roles__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Role"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_role_roles__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Role"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_role_roles__role_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The role ID. */
+                role_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Role"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_role_roles__role_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The role ID. */
+                role_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_role_roles__role_id__patch: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The role ID. */
+                role_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Role"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_role_scopes_roles__role_id__scopes_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-prefect-api-version"?: string;
+            };
+            path: {
+                /** @description The role ID. */
+                role_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleScopesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Role"];
+                };
             };
             /** @description Validation Error */
             422: {
